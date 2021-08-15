@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.2/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"caijianying.github.io","root":"/","images":"/images","scheme":"Muse","version":"8.2.2","exturl":false,"sidebar":{"position":"right","display":"hide","padding":18,"offset":12,"Pisces | Gemini":240},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"valine","storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}};
+  </script>
+<meta name="description" content="环境 mac环境 JDK 1.8.0_202 Gradle 4.10.3  步骤把spring源码fork到自己的仓库https:&#x2F;&#x2F;github.com&#x2F;spring-projects&#x2F;spring-framework">
+<meta property="og:type" content="article">
+<meta property="og:title" content="编译spring 5.1.X源码">
+<meta property="og:url" content="https://caijianying.github.io/posts/c9117111/index.html">
+<meta property="og:site_name" content="caijy&#39;s blog">
+<meta property="og:description" content="环境 mac环境 JDK 1.8.0_202 Gradle 4.10.3  步骤把spring源码fork到自己的仓库https:&#x2F;&#x2F;github.com&#x2F;spring-projects&#x2F;spring-framework">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://www.caijy.top//%E6%88%AA%E5%B1%8F2021-07-11%20%E4%B8%8B%E5%8D%8812.01.06.png">
+<meta property="og:image" content="https://www.caijy.top//1.png">
+<meta property="article:published_time" content="2021-07-10T14:52:21.000Z">
+<meta property="article:modified_time" content="2021-08-07T04:43:52.073Z">
+<meta property="article:author" content="caijy">
+<meta property="article:tag" content="spring源码">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.caijy.top//%E6%88%AA%E5%B1%8F2021-07-11%20%E4%B8%8B%E5%8D%8812.01.06.png">
+
+
+<link rel="canonical" href="https://caijianying.github.io/posts/c9117111/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<title>编译spring 5.1.X源码 | caijy's blog</title>
+  
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">caijy's blog</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+        <li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-guestbook"><a href="/guestbook/" rel="section"><i class="fa fa-book fa-fw"></i>留言板</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83"><span class="nav-number">1.</span> <span class="nav-text">环境</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4"><span class="nav-number">2.</span> <span class="nav-text">步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8A%8Aspring%E6%BA%90%E7%A0%81fork%E5%88%B0%E8%87%AA%E5%B7%B1%E7%9A%84%E4%BB%93%E5%BA%93"><span class="nav-number">2.0.1.</span> <span class="nav-text">把spring源码fork到自己的仓库</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%8B%E8%BD%BDspring%E6%BA%90%E7%A0%81"><span class="nav-number">2.0.2.</span> <span class="nav-text">下载spring源码</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%A1%AE%E5%AE%9Agradle%E7%89%88%E6%9C%AC"><span class="nav-number">2.0.3.</span> <span class="nav-text">确定gradle版本</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%A2%84%E7%BC%96%E8%AF%91%E5%89%8D%EF%BC%8C%E4%BF%AE%E6%94%B9build-gradle%E7%9A%84%E9%95%9C%E5%83%8F%E6%BA%90"><span class="nav-number">2.0.4.</span> <span class="nav-text">预编译前，修改build.gradle的镜像源</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8Bimport-into-idea-md"><span class="nav-number">2.0.5.</span> <span class="nav-text">查看import-into-idea.md</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E5%8F%8A%E8%A7%A3%E5%86%B3"><span class="nav-number">3.</span> <span class="nav-text">问题及解决</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%A2%84%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B%E4%B8%AD%E5%8F%AF%E8%83%BD%E4%BC%9A%E5%87%BA%E7%8E%B0JDK-tools%E6%97%A0%E6%B3%95%E8%A2%ABKotlin%E6%89%BE%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">3.1.</span> <span class="nav-text">预编译过程中可能会出现JDK tools无法被Kotlin找到的问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95%EF%BC%8C%E6%80%BB%E6%98%AF%E6%89%A7%E8%A1%8Cgradle%E6%89%93%E5%8C%85%E5%91%BD%E4%BB%A4"><span class="nav-number">3.2.</span> <span class="nav-text">运行单元测试，总是执行gradle打包命令</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="caijy"
+      src="/images/lf.gif">
+  <p class="site-author-name" itemprop="name">caijy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">19</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/caijianying" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://caijianying.github.io/posts/c9117111/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/lf.gif">
+      <meta itemprop="name" content="caijy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="caijy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          编译spring 5.1.X源码
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-07-10 22:52:21" itemprop="dateCreated datePublished" datetime="2021-07-10T22:52:21+08:00">2021-07-10</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-08-07 12:43:52" itemprop="dateModified" datetime="2021-08-07T12:43:52+08:00">2021-08-07</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/spring-5-1-X%E6%BA%90%E7%A0%81/" itemprop="url" rel="index"><span itemprop="name">spring 5.1.X源码</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h3 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h3><ol>
+<li>mac环境</li>
+<li>JDK 1.8.0_202</li>
+<li>Gradle 4.10.3</li>
+</ol>
+<h3 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h3><h5 id="把spring源码fork到自己的仓库"><a href="#把spring源码fork到自己的仓库" class="headerlink" title="把spring源码fork到自己的仓库"></a>把spring源码fork到自己的仓库</h5><p><code>https://github.com/spring-projects/spring-framework</code></p>
+<span id="more"></span>
+
+<h5 id="下载spring源码"><a href="#下载spring源码" class="headerlink" title="下载spring源码"></a>下载spring源码</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone git<span class="meta">@github</span>.com:caijianying/spring-framework.git -b <span class="number">5.1</span>.x</span><br></pre></td></tr></table></figure>
+
+<h5 id="确定gradle版本"><a href="#确定gradle版本" class="headerlink" title="确定gradle版本"></a>确定gradle版本</h5><p>进入<code>spring-framework</code>查看配置文件<code>cat gradle/wrapper/gradle-wrapper.properties</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">distributionBase=GRADLE_USER_HOME</span><br><span class="line">distributionPath=wrapper/dists</span><br><span class="line">distributionUrl=https\:<span class="comment">//services.gradle.org/distributions/gradle-4.10.3-bin.zip</span></span><br><span class="line">zipStoreBase=GRADLE_USER_HOME</span><br><span class="line">zipStorePath=wrapper/dists</span><br></pre></td></tr></table></figure>
+
+<p><code>distributionUrl</code>就是下载地址</p>
+<h5 id="预编译前，修改build-gradle的镜像源"><a href="#预编译前，修改build-gradle的镜像源" class="headerlink" title="预编译前，修改build.gradle的镜像源"></a>预编译前，修改<code>build.gradle</code>的镜像源</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">buildscript &#123;</span><br><span class="line">	repositories &#123;</span><br><span class="line">		maven &#123; url <span class="string">&#x27;https://maven.aliyun.com/repository/spring-plugin&#x27;</span> &#125;</span><br><span class="line">    maven &#123; url <span class="string">&quot;https://repo.spring.io/libs-spring-framewrok-build&quot;</span> &#125;</span><br><span class="line">	&#125;</span><br><span class="line">	dependencies &#123;</span><br><span class="line">		classpath(<span class="string">&quot;io.spring.gradle:propdeps-plugin:0.0.9.RELEASE&quot;</span>)</span><br><span class="line">		classpath(<span class="string">&quot;org.asciidoctor:asciidoctorj-pdf:1.5.0-alpha.16&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="查看import-into-idea-md"><a href="#查看import-into-idea-md" class="headerlink" title="查看import-into-idea.md"></a>查看<code>import-into-idea.md</code></h5><ol>
+<li>Precompile <code>spring-oxm</code> with <code>./gradlew :spring-oxm:compileTestJava</code></li>
+<li>Import into IntelliJ (File -&gt; New -&gt; Project from Existing Sources -&gt; Navigate to directory -&gt; Select build.gradle)</li>
+<li>When prompted exclude the <code>spring-aspects</code> module (or after the import via File-&gt; Project Structure -&gt; Modules)</li>
+<li>Code away</li>
+</ol>
+<h3 id="问题及解决"><a href="#问题及解决" class="headerlink" title="问题及解决"></a>问题及解决</h3><h4 id="预编译过程中可能会出现JDK-tools无法被Kotlin找到的问题"><a href="#预编译过程中可能会出现JDK-tools无法被Kotlin找到的问题" class="headerlink" title="预编译过程中可能会出现JDK tools无法被Kotlin找到的问题"></a>预编译过程中可能会出现<code>JDK tools</code>无法被<code>Kotlin</code>找到的问题</h4><p><code>Kotlin could not find the required JDK tools in the Java installation &#39;/Library/Internet Plug-Ins/JavaAppletPlugin.plugin/Contents/Home&#39; used by Gradle. Make sure Gradle is running on a JDK, not JRE.</code></p>
+<ol>
+<li><p>检查下当前的java环境 <code>/usr/libexec/java_home -V</code></p>
+<p><img src="https://www.caijy.top//%E6%88%AA%E5%B1%8F2021-07-11%20%E4%B8%8B%E5%8D%8812.01.06.png" alt="截屏2021-07-11 下午12.01.06"></p>
+<p>看到有两个JDK 路径，打开发现<code>/Library/Internet Plug-Ins/JavaAppletPlugin.plugin/Contents/Home</code>下的JDK确实没有jre，而通过dmg安装的<code>/Library/Java/JavaVirtualMachines/jdk1.8.0_202.jdk/Contents/Home</code>路径下有</p>
+</li>
+<li><p>在gradle.properties中配置org.gradle.java.home，指定gradle编译使用的java环境目录</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">   org.gradle.java.home=/Library/Java/JavaVirtualMachines/jdk1<span class="number">.8</span><span class="number">.0_202</span>.jdk/Contents/Home</span><br><span class="line"></span><br><span class="line">#### Kotlin版本太低</span><br><span class="line"></span><br><span class="line">`Kotlin: API version <span class="number">1.1</span> is no longer supported; please, use version <span class="number">1.2</span> or greater.`</span><br><span class="line"></span><br><span class="line"><span class="number">1.</span> 修改`build.gradle` 的`apiVersion` 和`languageVersion`</span><br><span class="line"></span><br><span class="line">   ```java</span><br><span class="line">   compileKotlin &#123;</span><br><span class="line">   		kotlinOptions &#123;</span><br><span class="line">   			jvmTarget = <span class="string">&quot;1.8&quot;</span></span><br><span class="line">   			freeCompilerArgs = [<span class="string">&quot;-Xjsr305=strict&quot;</span>]</span><br><span class="line">   			apiVersion = <span class="string">&quot;1.2&quot;</span></span><br><span class="line">   			languageVersion = <span class="string">&quot;1.2&quot;</span></span><br><span class="line">   		&#125;</span><br><span class="line">   	&#125;</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h4 id="运行单元测试，总是执行gradle打包命令"><a href="#运行单元测试，总是执行gradle打包命令" class="headerlink" title="运行单元测试，总是执行gradle打包命令"></a>运行单元测试，总是执行gradle打包命令</h4><p>这两处选择IDEA<img src="https://www.caijy.top//1.png" alt="1" style="zoom:50%;" /></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/spring%E6%BA%90%E7%A0%81/" rel="tag"># spring源码</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/posts/122b4e9d/" rel="prev" title="高效工具分享">
+                  <i class="fa fa-chevron-left"></i> 高效工具分享
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/posts/dd678fc4/" rel="next" title="spring核心过程">
+                  spring核心过程 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">created by caijy</span>
+</div>
+<!--
+-->
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+  
+
+
+
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"superSample":2,"width":150,"height":300,"position":"right","hOffset":0,"vOffset":-20},"mobile":{"show":true,"scale":0.5},"react":{"opacityDefault":0.7,"opacityOnHover":0.8},"log":false});</script></body>
+</html>
